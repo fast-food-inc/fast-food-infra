@@ -220,7 +220,7 @@ variable "eks_kubernetes_version" {
   type        = string
   # Use a widely supported patch series; override in dev.tfvars if needed.
   # If this version is rejected by AWS, we'll try letting EKS pick the default.
-  default     = "1.28"
+  default = "1.28"
 }
 
 variable "eks_node_instance_types" {
@@ -256,18 +256,18 @@ variable "cognito_admin_user_pool_id" {
 
 variable "cognito_admin_client_id" {
   type        = string
-  description = "ID do Cognito Client para administradores (opcional). Se vazio, o módulo Cognito criará um novo client e exporá o client_id como saída." 
+  description = "ID do Cognito Client para administradores (opcional). Se vazio, o módulo Cognito criará um novo client e exporá o client_id como saída."
   default     = ""
 }
 
 variable "jwt_admin_secret_name" {
-  type    = string
+  type        = string
   description = "Nome do secret para JWT de administradores"
-  default = "fast-food-jwt-admin-secret"
+  default     = "fast-food-jwt-admin-secret"
 }
 
 variable "jwt_admin_secret_string" {
-  type    = string
+  type        = string
   description = "Valor do secret para JWT de administradores (use Secrets Manager em produção)"
-  default = "admin_secret"
+  default     = "admin_secret"
 }
