@@ -114,8 +114,8 @@ module "api_gateway" {
 
   tags = var.tags
 }
-
-# Module EKS
+// Re-enable the EKS module: previously disabled due to version negotiation issues.
+// Adjust `eks_kubernetes_version` in variables.tf or dev.tfvars if needed.
 module "eks" {
   source = "./modules/eks"
 

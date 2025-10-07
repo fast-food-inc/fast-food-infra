@@ -218,7 +218,9 @@ variable "eks_cluster_name" {
 variable "eks_kubernetes_version" {
   description = "Versão do Kubernetes"
   type        = string
-  default     = "1.27"
+  # Use a widely supported patch series; override in dev.tfvars if needed.
+  # If this version is rejected by AWS, we'll try letting EKS pick the default.
+  default     = "1.28"
 }
 
 variable "eks_node_instance_types" {
@@ -243,4 +245,29 @@ variable "eks_min_capacity" {
   description = "Capacidade mínima do node group"
   type        = number
   default     = 1
+}
+
+# Variáveis para autenticação administrativa (Cognito)
+variable "cognito_admin_user_pool_id" {
+  type        = string
+  description = "ID do Cognito User Pool para administradores (opcional). Se vazio, o módulo Cognito cria um novo user pool."
+  default     = ""
+}
+
+variable "cognito_admin_client_id" {
+  type        = string
+  description = "ID do Cognito Client para administradores (opcional). Se vazio, o módulo Cognito criará um novo client e exporá o client_id como saída." 
+  default     = ""
+}
+
+variable "jwt_admin_secret_name" {
+  type    = string
+  description = "Nome do secret para JWT de administradores"
+  default = "fast-food-jwt-admin-secret"
+}
+
+variable "jwt_admin_secret_string" {
+  type    = string
+  description = "Valor do secret para JWT de administradores (use Secrets Manager em produção)"
+  default = "admin_secret"
 }

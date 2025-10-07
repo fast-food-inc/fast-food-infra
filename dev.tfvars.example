@@ -1,0 +1,27 @@
+# Example dev.tfvars for Fast Food infra (DO NOT COMMIT SECRETS)
+aws_region = "us-east-1"
+# Optional: remote backend settings (S3 bucket + DynamoDB table)
+# tf_state_bucket = "your-tf-state-bucket"
+# tf_state_lock_table = "your-tf-lock-table"
+
+cognito_user_pool_name = "fast-food-auth-user-pool"
+cognito_client_name    = "fast-food-auth-client"
+
+# JWT secret (leave empty in example; professor should set a real secret)
+jwt_secret_name   = "fast-food-jwt-secret-dev"
+jwt_secret_string = ""
+
+lambda_role_name     = "fast-food-auth-lambda-role"
+lambda_function_name = "fast-food-auth-identify-dev"
+lambda_package_path  = "../fast-food-auth-lambda/deploy/fast-food-auth-lambda.zip"
+lambda_handler       = "dist/handlers/identifyHandler.identifyHandler"
+lambda_runtime       = "nodejs18.x"
+
+api_name      = "fast-food-auth-api"
+api_stage_name = "$default"
+
+# EKS optional settings (if you use EKS)
+eks_kubernetes_version = "1.27"
+
+# tags (map)
+tags = { environment = "dev" project = "fast-food-auth" }

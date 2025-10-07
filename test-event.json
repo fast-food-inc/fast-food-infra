@@ -1,0 +1,14 @@
+{
+  "path": "/identify",
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"cpf\":\"11144477735\"}",
+  "requestContext": {
+    "http": {
+      "method": "POST",
+      "path": "/identify"
+    }
+  }
+}
