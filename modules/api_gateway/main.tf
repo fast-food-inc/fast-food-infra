@@ -1,10 +1,19 @@
-// Module: HTTP API Gateway + Lambda integration
+// Module: HTTP API Gateway + Hybrid Integration (Lambda + EKS)
 resource "aws_apigatewayv2_api" "this" {
   name          = var.api_name
   protocol_type = "HTTP"
+  
+  cors_configuration {
+    allow_origins = var.cors_allow_origins
+    allow_methods = var.cors_allow_methods
+    allow_headers = var.cors_allow_headers
+    max_age       = var.cors_max_age
+  }
 }
 
+# Lambda Integration (Authentication)
 resource "aws_lambda_permission" "apigw" {
+  count         = var.lambda_arn != "" ? 1 : 0
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = var.lambda_arn
@@ -13,21 +22,63 @@ resource "aws_lambda_permission" "apigw" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
-  api_id             = aws_apigatewayv2_api.this.id
-  integration_type   = "AWS_PROXY"
-  integration_uri    = var.lambda_arn
+  count             = var.lambda_arn != "" ? 1 : 0
+  api_id            = aws_apigatewayv2_api.this.id
+  integration_type  = "AWS_PROXY"
+  integration_uri   = var.lambda_arn
   integration_method = "POST"
   payload_format_version = "2.0"
 }
 
-resource "aws_apigatewayv2_route" "identify_route" {
+# EKS Integration (Application Services)
+resource "aws_apigatewayv2_integration" "eks_integration" {
+  count             = var.eks_load_balancer_arn != "" ? 1 : 0
+  api_id            = aws_apigatewayv2_api.this.id
+  integration_type  = "HTTP_PROXY"
+  integration_uri   = var.eks_load_balancer_arn
+  integration_method = "ANY"
+  
+  request_parameters = {
+    "overwrite:path" = "$request.path"
+  }
+}
+
+# Routes Configuration
+resource "aws_apigatewayv2_route" "lambda_routes" {
+  for_each = var.lambda_arn != "" ? var.lambda_routes : {}
+  api_id   = aws_apigatewayv2_api.this.id
+  route_key = each.value
+  target   = "integrations/${aws_apigatewayv2_integration.lambda_integration[0].id}"
+  
+  depends_on = [aws_apigatewayv2_integration.lambda_integration]
+}
+
+resource "aws_apigatewayv2_route" "eks_routes" {
+  for_each = var.eks_load_balancer_arn != "" ? var.eks_routes : {}
+  api_id   = aws_apigatewayv2_api.this.id
+  route_key = each.value
+  target   = "integrations/${aws_apigatewayv2_integration.eks_integration[0].id}"
+  
+  depends_on = [aws_apigatewayv2_integration.eks_integration]
+}
+
+# Default route (catch-all for EKS)
+resource "aws_apigatewayv2_route" "default_route" {
+  count     = var.eks_load_balancer_arn != "" ? 1 : 0
   api_id    = aws_apigatewayv2_api.this.id
-  route_key = "POST /identify"
-  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+  route_key = "ANY /{proxy+}"
+  target    = "integrations/${aws_apigatewayv2_integration.eks_integration[0].id}"
+  
+  depends_on = [aws_apigatewayv2_integration.eks_integration]
 }
 
 resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.this.id
   name        = var.stage_name
   auto_deploy = true
+  
+  default_route_settings {
+    throttling_rate_limit  = var.throttling_rate_limit
+    throttling_burst_limit = var.throttling_burst_limit
+  }
 }

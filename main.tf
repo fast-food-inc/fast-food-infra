@@ -4,14 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = ">= 5.0"
     }
-  }  # Temporarily using local backend to avoid lock issues
-  # backend "s3" {
-  #   bucket = "fiap-fastfood-terraform-state-dev"
-  #   key    = "infra/dev/terraform.tfstate"
-  #   region = "us-east-1"
-  #   dynamodb_table = "fiap-terraform-lock-dev"
-  #   encrypt = true
-  # }
+  }
+
+  # Using local backend for simplicity
+  # For production, consider using S3 backend with separate infrastructure
 }
 
 provider "aws" {
@@ -33,16 +29,27 @@ data "aws_subnets" "default" {
 module "cognito" {
   source = "./modules/cognito"
 
-  user_pool_name = var.cognito_user_pool_name
-  client_name    = var.cognito_client_name
-  lambda_config  = var.cognito_lambda_config
-  tags           = var.tags
+  user_pool_name                = var.cognito_user_pool_name
+  client_name                   = var.cognito_client_name
+  lambda_config                 = var.cognito_lambda_config
+  mfa_configuration             = var.cognito_mfa_configuration
+  username_attributes           = var.cognito_username_attributes
+  auto_verified_attributes      = var.cognito_auto_verified_attributes
+  allow_admin_create_user_only  = var.cognito_allow_admin_create_user_only
+  explicit_auth_flows           = var.cognito_explicit_auth_flows
+  prevent_user_existence_errors = var.cognito_prevent_user_existence_errors
+  generate_client_secret        = var.cognito_generate_client_secret
+  callback_urls                 = var.cognito_callback_urls
+  logout_urls                   = var.cognito_logout_urls
+  refresh_token_validity        = var.cognito_refresh_token_validity
+  supported_identity_providers  = var.cognito_supported_identity_providers
+  tags                          = var.tags
 }
 
 module "secrets" {
   source        = "./modules/secrets"
   secret_name   = var.jwt_secret_name
-  description   = "JWT secret for local/dev (store real secrets in Secrets Manager for production)"
+  description   = var.jwt_secret_description
   secret_string = var.jwt_secret_string
   tags          = var.tags
 }
@@ -56,13 +63,13 @@ module "iam" {
 }
 
 module "lambda" {
-  source       = "./modules/lambda"
+  source        = "./modules/lambda"
   function_name = var.lambda_function_name
   package_path  = var.lambda_package_path
   handler       = var.lambda_handler
   runtime       = var.lambda_runtime
   role_arn      = module.iam.lambda_role_arn
-  environment   = {
+  environment = {
     COGNITO_USER_POOL_ID = module.cognito.user_pool_id
     COGNITO_CLIENT_ID    = module.cognito.client_id
     JWT_SECRET_ARN       = module.secrets.secret_arn
@@ -72,24 +79,40 @@ module "lambda" {
 }
 
 module "api_gateway" {
-  source     = "./modules/api_gateway"
-  api_name   = var.api_name
-  lambda_arn = module.lambda.function_arn
-  stage_name = var.api_stage_name
-  tags       = var.tags
+  source                = "./modules/api_gateway"
+  api_name              = var.api_name
+  lambda_arn            = module.lambda.function_arn
+  eks_load_balancer_arn = var.eks_load_balancer_arn
+  stage_name            = var.api_stage_name
+
+  # Route Configuration
+  lambda_routes = var.lambda_routes
+  eks_routes    = var.eks_routes
+
+  # CORS Configuration
+  cors_allow_origins = var.cors_allow_origins
+  cors_allow_methods = var.cors_allow_methods
+  cors_allow_headers = var.cors_allow_headers
+  cors_max_age       = var.cors_max_age
+
+  # Throttling Configuration
+  throttling_rate_limit  = var.throttling_rate_limit
+  throttling_burst_limit = var.throttling_burst_limit
+
+  tags = var.tags
 }
 
 # Module EKS
 module "eks" {
   source = "./modules/eks"
 
-  cluster_name         = var.eks_cluster_name
-  kubernetes_version   = var.eks_kubernetes_version
-  subnet_ids           = data.aws_subnets.default.ids
-  private_subnet_ids   = data.aws_subnets.default.ids
-  node_instance_types  = var.eks_node_instance_types
-  desired_capacity     = var.eks_desired_capacity
-  max_capacity         = var.eks_max_capacity
-  min_capacity         = var.eks_min_capacity
-  tags                 = var.tags
+  cluster_name        = var.eks_cluster_name
+  kubernetes_version  = var.eks_kubernetes_version
+  subnet_ids          = data.aws_subnets.default.ids
+  private_subnet_ids  = data.aws_subnets.default.ids
+  node_instance_types = var.eks_node_instance_types
+  desired_capacity    = var.eks_desired_capacity
+  max_capacity        = var.eks_max_capacity
+  min_capacity        = var.eks_min_capacity
+  tags                = var.tags
 }
