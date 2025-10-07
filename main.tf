@@ -26,6 +26,19 @@ data "aws_subnets" "default" {
   }
 }
 
+# Filter subnets to only include EKS-supported availability zones
+data "aws_subnets" "eks_supported" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "availability-zone"
+    values = ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d", "us-east-1f"]
+  }
+}
+
 module "cognito" {
   source = "./modules/cognito"
 
@@ -108,8 +121,8 @@ module "eks" {
 
   cluster_name        = var.eks_cluster_name
   kubernetes_version  = var.eks_kubernetes_version
-  subnet_ids          = data.aws_subnets.default.ids
-  private_subnet_ids  = data.aws_subnets.default.ids
+  subnet_ids          = data.aws_subnets.eks_supported.ids
+  private_subnet_ids  = data.aws_subnets.eks_supported.ids
   node_instance_types = var.eks_node_instance_types
   desired_capacity    = var.eks_desired_capacity
   max_capacity        = var.eks_max_capacity

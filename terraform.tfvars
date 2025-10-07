@@ -23,7 +23,7 @@ cognito_supported_identity_providers  = ["COGNITO"]
 
 # Secrets Configuration
 jwt_secret_name        = "fast-food-jwt-secret"
-jwt_secret_string      = "gJ972vz%" # Set via CI/CD secrets or AWS Secrets Manager
+jwt_secret_string      = "" # Set via CI/CD secrets or AWS Secrets Manager
 jwt_secret_description = "JWT secret for Fast Food application authentication"
 
 # Lambda Configuration (Infrastructure only)
@@ -40,7 +40,7 @@ api_stage_name = "$default"
 
 # EKS Configuration
 eks_cluster_name        = "fast-food-cluster"
-eks_kubernetes_version  = "1.27"
+eks_kubernetes_version  = "1.29"
 eks_node_instance_types = ["t3.medium"]
 eks_desired_capacity    = 2
 eks_max_capacity        = 4
