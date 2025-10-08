@@ -10,10 +10,28 @@ variable "lambda_arn" {
   default     = ""
 }
 
-variable "eks_load_balancer_arn" {
+variable "eks_nlb_arn" {
   type        = string
-  description = "ARN of the EKS load balancer for application services"
+  description = "ARN of the EKS Network Load Balancer"
   default     = ""
+}
+
+variable "eks_nlb_listener_arn" {
+  type        = string
+  description = "ARN of the NLB listener for integration"
+  default     = ""
+}
+
+variable "vpc_link_subnet_ids" {
+  type        = list(string)
+  description = "Subnet IDs for VPC Link"
+  default     = []
+}
+
+variable "vpc_link_security_group_ids" {
+  type        = list(string)
+  description = "Security group IDs for VPC Link"
+  default     = []
 }
 
 variable "stage_name" {

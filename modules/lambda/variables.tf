@@ -18,3 +18,16 @@ variable "tags" {
   type = map(string) 
   default = {} 
 }
+
+# VPC Configuration (optional)
+variable "vpc_subnet_ids" {
+  type        = list(string)
+  description = "Subnet IDs for Lambda VPC configuration"
+  default     = []
+}
+
+variable "vpc_security_group_ids" {
+  type        = list(string)
+  description = "Security group IDs for Lambda VPC configuration"
+  default     = []
+}

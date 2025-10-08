@@ -46,6 +46,17 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "cognito-idp:ListUsers"
         ],
         Resource = var.cognito_arns
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "ec2:CreateNetworkInterface",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DeleteNetworkInterface",
+          "ec2:AssignPrivateIpAddresses",
+          "ec2:UnassignPrivateIpAddresses"
+        ],
+        Resource = "*"
       }
     ]
   })

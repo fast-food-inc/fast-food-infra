@@ -53,3 +53,9 @@ variable "tags" {
     Terraform   = "true"
   }
 }
+
+variable "secrets_arns" {
+  type        = list(string)
+  description = "ARNs of secrets that the service account can access"
+  default     = []
+}

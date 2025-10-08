@@ -142,11 +142,49 @@ variable "api_stage_name" {
   default = "$default"
 }
 
-# API Gateway Hybrid Configuration
-variable "eks_load_balancer_arn" {
+# ECR Configuration
+variable "ecr_repository_name" {
   type        = string
-  description = "ARN of the EKS load balancer (will be created by EKS module)"
+  description = "Name of the ECR repository for Docker images"
+  default     = "fast-food-api"
+}
+
+# RDS/Database Configuration
+variable "db_secret_name" {
+  type        = string
+  description = "Name of the secret for database credentials"
+  default     = "fast-food-db-credentials"
+}
+
+variable "db_username" {
+  type        = string
+  description = "Database username"
+  default     = "postgres"
+  sensitive   = true
+}
+
+variable "db_password" {
+  type        = string
+  description = "Database password"
+  sensitive   = true
+}
+
+variable "db_host" {
+  type        = string
+  description = "Database host endpoint (from RDS repo)"
   default     = ""
+}
+
+variable "db_port" {
+  type        = string
+  description = "Database port"
+  default     = "5432"
+}
+
+variable "db_name" {
+  type        = string
+  description = "Database name"
+  default     = "fastfooddb"
 }
 
 variable "lambda_routes" {

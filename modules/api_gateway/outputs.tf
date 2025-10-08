@@ -1,15 +1,24 @@
 output "api_id" {
-  value = aws_apigatewayv2_api.this.id
+  description = "The ID of the API Gateway"
+  value       = aws_apigatewayv2_api.this.id
 }
 
 output "api_endpoint" {
-  value = aws_apigatewayv2_api.this.api_endpoint
+  description = "The endpoint URL of the API Gateway"
+  value       = aws_apigatewayv2_api.this.api_endpoint
 }
 
-output "invoke_url" {
-  value = aws_apigatewayv2_stage.default.invoke_url
+output "api_arn" {
+  description = "The ARN of the API Gateway"
+  value       = aws_apigatewayv2_api.this.arn
 }
 
-output "execution_arn" {
-  value = aws_apigatewayv2_api.this.execution_arn
+output "stage_id" {
+  description = "The ID of the default stage"
+  value       = aws_apigatewayv2_stage.default.id
+}
+
+output "vpc_link_id" {
+  description = "The ID of the VPC Link"
+  value       = var.eks_nlb_arn != "" ? aws_apigatewayv2_vpc_link.eks_vpc_link[0].id : ""
 }
