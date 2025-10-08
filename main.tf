@@ -106,11 +106,11 @@ module "lambda" {
     COGNITO_CLIENT_ID    = module.cognito.client_id
     JWT_SECRET_ARN       = module.secrets.secret_arn
   }
-  
+
   # VPC Configuration for RDS access
   vpc_subnet_ids         = data.aws_subnets.eks_supported.ids
   vpc_security_group_ids = [module.eks.cluster_security_group_id]
-  
+
   timeout = var.lambda_timeout
   tags    = var.tags
 }
@@ -124,9 +124,9 @@ module "ecr" {
 
 # RDS Database Credentials in Secrets Manager
 module "db_secrets" {
-  source        = "./modules/secrets"
-  secret_name   = var.db_secret_name
-  description   = "Database credentials for Fast Food API"
+  source      = "./modules/secrets"
+  secret_name = var.db_secret_name
+  description = "Database credentials for Fast Food API"
   secret_string = jsonencode({
     username = var.db_username
     password = var.db_password
@@ -138,14 +138,14 @@ module "db_secrets" {
 }
 
 module "api_gateway" {
-  source                       = "./modules/api_gateway"
-  api_name                     = var.api_name
-  lambda_arn                   = module.lambda.function_arn
-  eks_nlb_arn                  = module.eks.nlb_arn
-  eks_nlb_listener_arn         = module.eks.nlb_listener_arn
-  vpc_link_subnet_ids          = data.aws_subnets.eks_supported.ids
-  vpc_link_security_group_ids  = [module.eks.cluster_security_group_id]
-  stage_name                   = var.api_stage_name
+  source                      = "./modules/api_gateway"
+  api_name                    = var.api_name
+  lambda_arn                  = module.lambda.function_arn
+  eks_nlb_arn                 = module.eks.nlb_arn
+  eks_nlb_listener_arn        = module.eks.nlb_listener_arn
+  vpc_link_subnet_ids         = data.aws_subnets.eks_supported.ids
+  vpc_link_security_group_ids = [module.eks.cluster_security_group_id]
+  stage_name                  = var.api_stage_name
 
   # Route Configuration
   lambda_routes = var.lambda_routes
@@ -162,7 +162,7 @@ module "api_gateway" {
   throttling_burst_limit = var.throttling_burst_limit
 
   tags = var.tags
-  
+
   depends_on = [module.eks]
 }
 // Re-enable the EKS module: previously disabled due to version negotiation issues.

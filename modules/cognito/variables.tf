@@ -33,13 +33,13 @@ variable "lambda_config" {
 }
 
 variable "allow_admin_create_user_only" {
-  type        = bool
-  default     = false
+  type    = bool
+  default = false
 }
 
 variable "explicit_auth_flows" {
-  type        = list(string)
-  default     = ["ALLOW_CUSTOM_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"]
+  type    = list(string)
+  default = ["ALLOW_CUSTOM_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"]
 }
 
 variable "prevent_user_existence_errors" {

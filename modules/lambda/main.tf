@@ -7,11 +7,11 @@ resource "aws_lambda_function" "this" {
   handler          = var.handler
   runtime          = var.runtime
   role             = var.role_arn
-  
+
   environment {
     variables = var.environment
   }
-  
+
   # VPC Configuration (optional - for RDS access)
   dynamic "vpc_config" {
     for_each = length(var.vpc_subnet_ids) > 0 ? [1] : []
@@ -20,7 +20,7 @@ resource "aws_lambda_function" "this" {
       security_group_ids = var.vpc_security_group_ids
     }
   }
-  
+
   timeout = var.timeout
   tags    = var.tags
 }

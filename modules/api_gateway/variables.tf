@@ -55,9 +55,9 @@ variable "eks_routes" {
   type        = map(string)
   description = "Routes that should go to EKS (application services)"
   default = {
-    "orders"    = "ANY /orders/{proxy+}"
-    "products"  = "ANY /products/{proxy+}"
-    "users"     = "ANY /users/{proxy+}"
+    "orders"   = "ANY /orders/{proxy+}"
+    "products" = "ANY /products/{proxy+}"
+    "users"    = "ANY /users/{proxy+}"
     "health"   = "GET /health"
   }
 }

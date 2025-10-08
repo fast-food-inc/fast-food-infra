@@ -1,18 +1,18 @@
 variable "role_name" {
-  type        = string
+  type = string
 }
 
 variable "secrets_arns" {
-  type        = list(string)
-  default     = []
+  type    = list(string)
+  default = []
 }
 
 variable "cognito_arns" {
-  type        = list(string)
-  default     = []
+  type    = list(string)
+  default = []
 }
 
 variable "tags" {
-  type        = map(string)
-  default     = {}
+  type    = map(string)
+  default = {}
 }

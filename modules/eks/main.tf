@@ -156,7 +156,7 @@ resource "aws_lb" "eks_nlb" {
   load_balancer_type = "network"
   subnets            = var.subnet_ids
 
-  enable_deletion_protection = false
+  enable_deletion_protection       = false
   enable_cross_zone_load_balancing = true
 
   tags = merge(var.tags, {
@@ -167,7 +167,7 @@ resource "aws_lb" "eks_nlb" {
 # Target Group for NLB (will point to NodePort service)
 resource "aws_lb_target_group" "eks_tg" {
   name        = "${var.cluster_name}-tg"
-  port        = 30080  # NodePort - will be configured in K8s
+  port        = 30080 # NodePort - will be configured in K8s
   protocol    = "TCP"
   vpc_id      = data.aws_vpc.cluster_vpc.id
   target_type = "instance"
@@ -201,5 +201,5 @@ resource "aws_lb_listener" "eks_listener" {
 # Auto-attach EKS nodes to target group
 resource "aws_autoscaling_attachment" "eks_asg_attachment" {
   autoscaling_group_name = aws_eks_node_group.fast_food_nodes.resources[0].autoscaling_groups[0].name
-  lb_target_group_arn   = aws_lb_target_group.eks_tg.arn
+  lb_target_group_arn    = aws_lb_target_group.eks_tg.arn
 }

@@ -2,7 +2,7 @@
 resource "aws_apigatewayv2_api" "this" {
   name          = var.api_name
   protocol_type = "HTTP"
-  
+
   cors_configuration {
     allow_origins = var.cors_allow_origins
     allow_methods = var.cors_allow_methods
@@ -22,11 +22,11 @@ resource "aws_lambda_permission" "apigw" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
-  count             = var.lambda_arn != "" ? 1 : 0
-  api_id            = aws_apigatewayv2_api.this.id
-  integration_type  = "AWS_PROXY"
-  integration_uri   = var.lambda_arn
-  integration_method = "POST"
+  count                  = var.lambda_arn != "" ? 1 : 0
+  api_id                 = aws_apigatewayv2_api.this.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = var.lambda_arn
+  integration_method     = "POST"
   payload_format_version = "2.0"
 }
 
@@ -49,7 +49,7 @@ resource "aws_apigatewayv2_integration" "eks_integration" {
   integration_uri    = var.eks_nlb_listener_arn
   connection_type    = "VPC_LINK"
   connection_id      = aws_apigatewayv2_vpc_link.eks_vpc_link[0].id
-  
+
   request_parameters = {
     "overwrite:path" = "$request.path"
   }
@@ -57,20 +57,20 @@ resource "aws_apigatewayv2_integration" "eks_integration" {
 
 # Routes Configuration
 resource "aws_apigatewayv2_route" "lambda_routes" {
-  for_each = var.lambda_arn != "" ? var.lambda_routes : {}
-  api_id   = aws_apigatewayv2_api.this.id
+  for_each  = var.lambda_arn != "" ? var.lambda_routes : {}
+  api_id    = aws_apigatewayv2_api.this.id
   route_key = each.value
-  target   = "integrations/${aws_apigatewayv2_integration.lambda_integration[0].id}"
-  
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration[0].id}"
+
   depends_on = [aws_apigatewayv2_integration.lambda_integration]
 }
 
 resource "aws_apigatewayv2_route" "eks_routes" {
-  for_each = var.eks_nlb_arn != "" ? var.eks_routes : {}
-  api_id   = aws_apigatewayv2_api.this.id
+  for_each  = var.eks_nlb_arn != "" ? var.eks_routes : {}
+  api_id    = aws_apigatewayv2_api.this.id
   route_key = each.value
-  target   = "integrations/${aws_apigatewayv2_integration.eks_integration[0].id}"
-  
+  target    = "integrations/${aws_apigatewayv2_integration.eks_integration[0].id}"
+
   depends_on = [aws_apigatewayv2_integration.eks_integration]
 }
 
@@ -80,7 +80,7 @@ resource "aws_apigatewayv2_route" "default_route" {
   api_id    = aws_apigatewayv2_api.this.id
   route_key = "ANY /{proxy+}"
   target    = "integrations/${aws_apigatewayv2_integration.eks_integration[0].id}"
-  
+
   depends_on = [aws_apigatewayv2_integration.eks_integration]
 }
 
@@ -88,7 +88,7 @@ resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.this.id
   name        = var.stage_name
   auto_deploy = true
-  
+
   default_route_settings {
     throttling_rate_limit  = var.throttling_rate_limit
     throttling_burst_limit = var.throttling_burst_limit
