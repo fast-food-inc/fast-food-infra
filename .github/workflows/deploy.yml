@@ -101,5 +101,5 @@ jobs:
           name: terraform-plan
 
       - name: 🚀 Terraform Apply
-        run: terraform apply -auto-approve tfplan -var="jwt_secret_string=${{ secrets.JWT_SECRET_STRING }}"
+        run: terraform apply -auto-approve tfplan
         working-directory: .
