@@ -20,5 +20,5 @@ output "stage_id" {
 
 output "vpc_link_id" {
   description = "The ID of the VPC Link"
-  value       = var.eks_nlb_arn != "" ? aws_apigatewayv2_vpc_link.eks_vpc_link[0].id : ""
+  value       = aws_apigatewayv2_vpc_link.eks_vpc_link.id
 }
