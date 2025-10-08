@@ -1,9 +1,0 @@
-# Production Backend Configuration
-# Copy this file to backend-production.hcl and update the values
-# Usage: terraform init -backend-config=backend-production.hcl
-
-bucket         = "your-company-terraform-state-prod"
-key            = "fast-food-infra/terraform.tfstate"
-region         = "us-east-1"
-dynamodb_table = "terraform-locks-prod"
-encrypt        = true

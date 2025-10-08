@@ -1,9 +1,28 @@
 // Module: Lambda function (ZIP upload) with role and environment variables
+// Creates Lambda with stub code if package_path is empty (code deployed separately)
+data "archive_file" "stub_lambda" {
+  type        = "zip"
+  output_path = "${path.module}/stub-lambda.zip"
+
+  source {
+    content  = <<-EOT
+      exports.handler = async (event) => {
+        return {
+          statusCode: 503,
+          body: JSON.stringify({
+            message: 'Lambda infrastructure created. Awaiting code deployment from fast-food-auth-lambda workflow.'
+          })
+        };
+      };
+    EOT
+    filename = "index.js"
+  }
+}
+
 resource "aws_lambda_function" "this" {
-  count            = var.package_path != "" ? 1 : 0
   function_name    = var.function_name
-  filename         = var.package_path
-  source_code_hash = filebase64sha256(var.package_path)
+  filename         = var.package_path != "" ? var.package_path : data.archive_file.stub_lambda.output_path
+  source_code_hash = var.package_path != "" ? filebase64sha256(var.package_path) : data.archive_file.stub_lambda.output_base64sha256
   handler          = var.handler
   runtime          = var.runtime
   role             = var.role_arn
@@ -23,6 +42,15 @@ resource "aws_lambda_function" "this" {
 
   timeout = var.timeout
   tags    = var.tags
+  
+  lifecycle {
+    ignore_changes = [
+      # Allow Lambda workflow to update code independently
+      filename,
+      source_code_hash,
+      last_modified
+    ]
+  }
 }
 
 # Permissão comentada - já é criada pelo módulo API Gateway

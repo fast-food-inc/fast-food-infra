@@ -53,16 +53,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: 📥 Download previous state
-        uses: dawidd6/action-download-artifact@v3
-        continue-on-error: true
-        with:
-          workflow: deploy.yml
-          workflow_conclusion: success
-          name: terraform-state
-          path: .
-          if_no_artifact_found: warn
-
       - name: 🔧 Terraform Init
         run: terraform init
 
@@ -70,7 +60,8 @@ jobs:
         run: |
           terraform plan -out=tfplan \
             -var="jwt_secret_string=${{ secrets.JWT_SECRET_STRING }}" \
-            -var="db_password=${{ secrets.DB_PASSWORD }}"
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="db_host=${{ vars.DB_HOST || '' }}"
 
       - name: 📤 Upload Plan
         uses: actions/upload-artifact@v4
@@ -101,16 +92,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: 📥 Download previous state
-        uses: dawidd6/action-download-artifact@v3
-        continue-on-error: true
-        with:
-          workflow: deploy.yml
-          workflow_conclusion: success
-          name: terraform-state
-          path: .
-          if_no_artifact_found: warn
-
       - name: 🔧 Terraform Init
         run: terraform init
 
@@ -122,12 +103,18 @@ jobs:
       - name: 🚀 Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-      - name: 📤 Upload State
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: terraform-state
-          path: |
-            terraform.tfstate
-            terraform.tfstate.backup
-          retention-days: 90
+      - name: 📊 Show Outputs
+        run: |
+          echo "### 🎉 Infrastructure Deployment Complete!"
+          echo ""
+          echo "#### 📋 Resource Names (Configure in GitHub Variables)"
+          echo "**EKS Cluster Name:** $(terraform output -raw eks_cluster_name)"
+          echo "**ECR Repository URL:** $(terraform output -raw ecr_repository_url)"
+          echo "**API Gateway URL:** $(terraform output -raw api_gateway_invoke_url)"
+          echo "**Lambda Function:** $(terraform output -raw lambda_function_name)"
+          echo ""
+          echo "#### ⚙️ Next Steps:"
+          echo "1. Set GitHub Variables in fast-food-auth-lambda repo: LAMBDA_FUNCTION_NAME"
+          echo "2. Set GitHub Variables in fast-food-api repo: ECR_REPOSITORY, EKS_CLUSTER_NAME"
+          echo "3. Deploy Lambda code via fast-food-auth-lambda workflow"
+          echo "4. Deploy API via fast-food-api workflow"

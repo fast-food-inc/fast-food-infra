@@ -6,8 +6,11 @@ terraform {
     }
   }
 
-  # Using local backend for simplicity
-  # For production, consider using S3 backend with separate infrastructure
+  backend "s3" {
+    bucket = "fast-food-terraform-state-397505580549"
+    key    = "infra/terraform.tfstate"
+    region = "us-east-1"
+  }
 }
 
 provider "aws" {
