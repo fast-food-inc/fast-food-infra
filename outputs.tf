@@ -11,7 +11,7 @@ output "cognito_client_id" {
 }
 
 output "cognito_client_secret" {
-  value = module.cognito.client_secret
+  value     = module.cognito.client_secret
   sensitive = true
 }
 

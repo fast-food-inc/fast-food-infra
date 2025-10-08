@@ -1,5 +1,6 @@
 // Module: Lambda function (ZIP upload) with role and environment variables
 resource "aws_lambda_function" "this" {
+  count         = var.package_path != "" ? 1 : 0
   function_name = var.function_name
   filename      = var.package_path
   source_code_hash = filebase64sha256(var.package_path)
