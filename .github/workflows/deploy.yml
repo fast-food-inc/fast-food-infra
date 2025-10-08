@@ -60,7 +60,7 @@ jobs:
         working-directory: .
 
       - name: 📋 Terraform Plan
-        run: terraform plan -out=tfplan -var="jwt_secret_string=${{ secrets.JWT_SECRET_STRING }}"
+        run: terraform plan -out=tfplan -var="jwt_secret_string=${{ secrets.JWT_SECRET_STRING }}" -var="db_password=${{ secrets.DB_PASSWORD }}"
         working-directory: .
 
       - name: 📤 Upload Plan
