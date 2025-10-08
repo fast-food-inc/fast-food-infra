@@ -55,6 +55,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: 📥 Download previous state
+        uses: dawidd6/action-download-artifact@v3
+        continue-on-error: true
+        with:
+          workflow: deploy.yml
+          name: terraform-state
+          path: .
+          if_no_artifact_found: warn
+
       - name: 🔧 Terraform Init
         run: terraform init
         working-directory: .
@@ -73,7 +82,7 @@ jobs:
     name: 🚀 Terraform Apply
     runs-on: ubuntu-latest
     needs: [terraform-validate, terraform-plan]
-    if: false  # Disabled: infrastructure managed locally due to local state
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     environment: production
     steps:
       - name: 📥 Checkout code
@@ -91,6 +100,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: 📥 Download previous state
+        uses: dawidd6/action-download-artifact@v3
+        continue-on-error: true
+        with:
+          workflow: deploy.yml
+          name: terraform-state
+          path: .
+          if_no_artifact_found: warn
+
       - name: 🔧 Terraform Init
         run: terraform init
         working-directory: .
@@ -103,3 +121,13 @@ jobs:
       - name: 🚀 Terraform Apply
         run: terraform apply -auto-approve tfplan
         working-directory: .
+
+      - name: 📤 Upload State
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: terraform-state
+          path: |
+            terraform.tfstate
+            terraform.tfstate.backup
+          retention-days: 90
