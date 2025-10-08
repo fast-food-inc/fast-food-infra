@@ -1,0 +1,27 @@
+name: 📤 Upload Current Terraform State
+
+on:
+  workflow_dispatch:
+
+jobs:
+  upload-state:
+    name: Upload State
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download state from local
+        run: |
+          echo "Manual upload - state should be committed temporarily"
+          ls -la terraform.tfstate* || echo "State files not found"
+
+      - name: 📤 Upload State Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-state
+          path: |
+            terraform.tfstate
+            terraform.tfstate.backup
+          retention-days: 90
+
