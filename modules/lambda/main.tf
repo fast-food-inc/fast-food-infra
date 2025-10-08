@@ -47,8 +47,7 @@ resource "aws_lambda_function" "this" {
     ignore_changes = [
       # Allow Lambda workflow to update code independently
       filename,
-      source_code_hash,
-      last_modified
+      source_code_hash
     ]
   }
 }

@@ -13,7 +13,6 @@ resource "aws_apigatewayv2_api" "this" {
 
 # Lambda Integration (Authentication)
 resource "aws_lambda_permission" "apigw" {
-  count         = var.lambda_arn != "" ? 1 : 0
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = var.lambda_arn
@@ -22,7 +21,6 @@ resource "aws_lambda_permission" "apigw" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
-  count                  = var.lambda_arn != "" ? 1 : 0
   api_id                 = aws_apigatewayv2_api.this.id
   integration_type       = "AWS_PROXY"
   integration_uri        = var.lambda_arn
@@ -58,7 +56,7 @@ resource "aws_apigatewayv2_route" "lambda_routes" {
   for_each  = var.lambda_arn != "" ? var.lambda_routes : {}
   api_id    = aws_apigatewayv2_api.this.id
   route_key = each.value
-  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration[0].id}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 
   depends_on = [aws_apigatewayv2_integration.lambda_integration]
 }
