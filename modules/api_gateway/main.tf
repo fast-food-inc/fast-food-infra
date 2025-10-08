@@ -30,13 +30,25 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
   payload_format_version = "2.0"
 }
 
-# EKS Integration (Application Services)
+# VPC Link for private integration with NLB
+resource "aws_apigatewayv2_vpc_link" "eks_vpc_link" {
+  count              = var.eks_nlb_arn != "" ? 1 : 0
+  name               = "${var.api_name}-vpc-link"
+  security_group_ids = var.vpc_link_security_group_ids
+  subnet_ids         = var.vpc_link_subnet_ids
+
+  tags = var.tags
+}
+
+# EKS Integration (Application Services) via VPC Link
 resource "aws_apigatewayv2_integration" "eks_integration" {
-  count             = var.eks_load_balancer_arn != "" ? 1 : 0
-  api_id            = aws_apigatewayv2_api.this.id
-  integration_type  = "HTTP_PROXY"
-  integration_uri   = var.eks_load_balancer_arn
+  count              = var.eks_nlb_arn != "" ? 1 : 0
+  api_id             = aws_apigatewayv2_api.this.id
+  integration_type   = "HTTP_PROXY"
   integration_method = "ANY"
+  integration_uri    = var.eks_nlb_listener_arn
+  connection_type    = "VPC_LINK"
+  connection_id      = aws_apigatewayv2_vpc_link.eks_vpc_link[0].id
   
   request_parameters = {
     "overwrite:path" = "$request.path"
@@ -54,7 +66,7 @@ resource "aws_apigatewayv2_route" "lambda_routes" {
 }
 
 resource "aws_apigatewayv2_route" "eks_routes" {
-  for_each = var.eks_load_balancer_arn != "" ? var.eks_routes : {}
+  for_each = var.eks_nlb_arn != "" ? var.eks_routes : {}
   api_id   = aws_apigatewayv2_api.this.id
   route_key = each.value
   target   = "integrations/${aws_apigatewayv2_integration.eks_integration[0].id}"
@@ -64,7 +76,7 @@ resource "aws_apigatewayv2_route" "eks_routes" {
 
 # Default route (catch-all for EKS)
 resource "aws_apigatewayv2_route" "default_route" {
-  count     = var.eks_load_balancer_arn != "" ? 1 : 0
+  count     = var.eks_nlb_arn != "" ? 1 : 0
   api_id    = aws_apigatewayv2_api.this.id
   route_key = "ANY /{proxy+}"
   target    = "integrations/${aws_apigatewayv2_integration.eks_integration[0].id}"
