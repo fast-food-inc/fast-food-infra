@@ -53,7 +53,7 @@ resource "aws_apigatewayv2_integration" "eks_integration" {
 
 # Routes Configuration
 resource "aws_apigatewayv2_route" "lambda_routes" {
-  for_each  = var.lambda_arn != "" ? var.lambda_routes : {}
+  for_each  = var.lambda_routes
   api_id    = aws_apigatewayv2_api.this.id
   route_key = each.value
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
