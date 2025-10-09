@@ -109,6 +109,17 @@ resource "aws_iam_role_policy_attachment" "eks_container_registry_policy" {
   role       = aws_iam_role.eks_node_role.name
 }
 
+# Security Group Rule: Allow NLB to access NodePort
+resource "aws_security_group_rule" "allow_nlb_to_nodeport" {
+  type              = "ingress"
+  from_port         = 30080
+  to_port           = 30080
+  protocol          = "tcp"
+  cidr_blocks       = [data.aws_vpc.cluster_vpc.cidr_block]
+  security_group_id = aws_eks_cluster.fast_food_cluster.vpc_config[0].cluster_security_group_id
+  description       = "Allow NLB health checks and traffic to NodePort 30080"
+}
+
 # Security Group for NLB
 resource "aws_security_group" "nlb_sg" {
   name        = "${var.cluster_name}-nlb-sg"
