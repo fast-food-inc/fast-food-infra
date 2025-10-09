@@ -65,17 +65,10 @@ jobs:
 
       - name: 📋 Terraform Plan
         run: |
-          terraform plan -out=tfplan \
+          terraform plan \
             -var="jwt_secret_string=${{ secrets.JWT_SECRET_STRING }}" \
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -var="db_host=${{ vars.DB_HOST || '' }}"
-
-      - name: 📤 Upload Plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-plan
-          path: tfplan
-          retention-days: 7
 
   terraform-apply:
     name: 🚀 Terraform Apply
@@ -102,13 +95,12 @@ jobs:
       - name: 🔧 Terraform Init
         run: terraform init
 
-      - name: 📥 Download Plan
-        uses: actions/download-artifact@v4
-        with:
-          name: terraform-plan
-
       - name: 🚀 Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: |
+          terraform apply -auto-approve \
+            -var="jwt_secret_string=${{ secrets.JWT_SECRET_STRING }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="db_host=${{ vars.DB_HOST || '' }}"
 
       - name: 📊 Show Outputs
         run: |
