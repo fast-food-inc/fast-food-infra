@@ -79,11 +79,11 @@ graph TB
 **Endpoints**:
 - `POST /auth/identify` - Identificar cliente por CPF
 
-### 2. Serviço Catálogo (EKS + PostgreSQL)
-**Responsabilidade**: Gerenciamento de clientes e categorias
+### 2. Serviço Catálogo / Produto (EKS + DynamoDB) - NOVO
+**Responsabilidade**: Gerenciamento de clientes, categorias e produtos
 
-**Banco de Dados**: PostgreSQL (catalog_db)
-- Tabelas: customers, categories
+**Banco de Dados**: DynamoDB (catalog_db)
+- Tabelas: customers, categories, products
 
 **Endpoints**:
 - `GET /api/customers` - Listar todos os clientes
@@ -97,23 +97,15 @@ graph TB
 - `POST /api/categories` - Criar categoria
 - `PUT /api/categories/:id` - Atualizar categoria
 - `DELETE /api/categories/:id` - Deletar categoria
-
-### 3. Serviço Produto (EKS + DynamoDB) - NOVO
-**Responsabilidade**: Catálogo de produtos com leituras de alta performance
-
-**Banco de Dados**: DynamoDB (tabela products)
-
-**Endpoints**:
 - `GET /api/products` - Listar produtos
 - `GET /api/products/:id` - Buscar produto
 - `GET /api/products/category/:categoryId` - Buscar produtos por categoria
 - `POST /api/products` - Criar produto
 - `PUT /api/products/:id` - Atualizar produto
 - `DELETE /api/products/:id` - Deletar produto
-- `POST /api/products/:id/reserve-stock` - Reservar estoque (interno)
-- `POST /api/products/:id/release-stock` - Liberar estoque (interno)
 
-### 4. Serviço Gerenciamento de Pedidos (EKS + PostgreSQL)
+
+### 3. Serviço Gerenciamento de Pedidos (EKS + PostgreSQL)
 **Responsabilidade**: Ciclo de vida dos pedidos e operações da cozinha
 
 **Banco de Dados**: PostgreSQL (orders_db)
@@ -137,7 +129,7 @@ graph TB
 - `GET /api/kitchen/orders` - Visualização da cozinha (pedidos ordenados)
 - `GET /api/kitchen/orders/awaiting-preparation` - Aguardando preparo
 
-### 5. Serviço Pagamento (EKS + PostgreSQL)
+### 4. Serviço Pagamento (EKS + PostgreSQL)
 **Responsabilidade**: Processamento de pagamentos e integração Mercado Pago
 
 **Banco de Dados**: PostgreSQL (payments_db)
