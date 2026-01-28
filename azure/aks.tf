@@ -30,6 +30,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
     }
   }
 
+  ingress_application_gateway {
+    subnet_id = azurerm_subnet.appgw_subnet.id
+  }
+
   network_profile {
     network_plugin    = "azure"
     load_balancer_sku = "standard"
