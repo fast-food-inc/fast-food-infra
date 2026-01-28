@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fast-food-catalog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fast-food-catalog
+  template:
+    metadata:
+      labels:
+        app: fast-food-catalog
+    spec:
+      containers:
+        - name: catalog
+          # The image tag will be replaced during CI/CD
+          image: fastfoodacrrg.azurecr.io/fast-food-catalog:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets-azure
+                  key: mongo-uri
+            - name: MONGODB_DATABASE
+              value: "fast-food-catalog"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fast-food-catalog
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    app: fast-food-catalog

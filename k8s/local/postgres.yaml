@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fast-food-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fast-food-postgres
+  template:
+    metadata:
+      labels:
+        app: fast-food-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "password"
+            # Default DB, others created by script if needed
+            - name: POSTGRES_DB
+              value: "fast_food_production" 
+          # In a real scenario we'd mount a script to create multiple DBs, 
+          # but for creating the second DB we can just let Prisma create it or use a simple hack.
+          # For simplicity here, we assume the Order app uses the default DB 
+          # and we might need to manually create the payment DB or assume the app does it if configured.
+          # Actually, postgres docker image supports /docker-entrypoint-initdb.d/ to verify.
+          # Let's add an init script configmap
+          volumeMounts:
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: init-script
+          configMap:
+            name: postgres-init-script
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-script
+data:
+  init.sql: |
+    CREATE DATABASE fast_food_payment;
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fast-food-postgres
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: fast-food-postgres

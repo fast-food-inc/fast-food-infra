@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fast-food-payment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fast-food-payment
+  template:
+    metadata:
+      labels:
+        app: fast-food-payment
+    spec:
+      containers:
+        - name: payment
+          image: fast-food-payment:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 4000
+          env:
+            - name: NODE_ENV
+              value: "development"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: payment-db-url
+            - name: ORDER_SERVICE_URL
+              value: "http://fast-food-order:3002"
+            # Mock values for local dev if not provided
+            - name: MERCADO_PAGO_ACCESS_TOKEN
+              value: "TEST-00000000-0000-0000-0000-000000000000"
+            - name: MERCADO_PAGO_NOTIFICATION_URL
+              value: "http://webhook-site.com/notification"
+          command: ["/bin/sh", "-c"]
+          args:
+            - npx prisma generate && npx prisma db push --accept-data-loss && npm start
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fast-food-payment
+spec:
+  type: NodePort
+  ports:
+    - port: 4000
+      targetPort: 4000
+      nodePort: 30004
+  selector:
+    app: fast-food-payment

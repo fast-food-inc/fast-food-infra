@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fast-food-mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fast-food-mongodb
+  template:
+    metadata:
+      labels:
+        app: fast-food-mongodb
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7
+          ports:
+            - containerPort: 27017
+          env:
+             - name: MONGO_INITDB_DATABASE
+               value: "fast-food-catalog"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fast-food-mongodb
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    app: fast-food-mongodb

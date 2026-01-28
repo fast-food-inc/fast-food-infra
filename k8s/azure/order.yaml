@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fast-food-order
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fast-food-order
+  template:
+    metadata:
+      labels:
+        app: fast-food-order
+    spec:
+      containers:
+        - name: order
+          image: fastfoodacrrg.azurecr.io/fast-food-order:latest
+          ports:
+            - containerPort: 3002
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets-azure
+                  key: order-db-url
+          # For production, we usually run migrations in a separate Job, but here we keep it simple
+          command: ["/bin/sh", "-c"]
+          args:
+            - npx prisma generate && npx prisma db push --accept-data-loss && npm start
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fast-food-order
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3002
+      targetPort: 3002
+  selector:
+    app: fast-food-order

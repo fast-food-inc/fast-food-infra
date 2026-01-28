@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fast-food-catalog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fast-food-catalog
+  template:
+    metadata:
+      labels:
+        app: fast-food-catalog
+    spec:
+      containers:
+        - name: catalog
+          image: fast-food-catalog:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: mongo-uri
+            - name: MONGODB_DATABASE
+              value: "fast-food-catalog"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fast-food-catalog
+spec:
+  type: NodePort
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30000
+  selector:
+    app: fast-food-catalog

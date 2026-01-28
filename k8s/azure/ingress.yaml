@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fast-food-ingress
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api/catalog
+            pathType: Prefix
+            backend:
+              service:
+                name: fast-food-catalog
+                port:
+                  number: 3000
+          - path: /api/orders
+            pathType: Prefix
+            backend:
+              service:
+                name: fast-food-order
+                port:
+                  number: 3002
+          - path: /api/payments
+            pathType: Prefix
+            backend:
+              service:
+                name: fast-food-payment
+                port:
+                  number: 4000
+          - path: /webhooks
+            pathType: Prefix
+            backend:
+              service:
+                name: fast-food-payment
+                port:
+                  number: 4000

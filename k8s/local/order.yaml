@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fast-food-order
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fast-food-order
+  template:
+    metadata:
+      labels:
+        app: fast-food-order
+    spec:
+      containers:
+        - name: order
+          image: fast-food-order:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3002
+          env:
+            - name: NODE_ENV
+              value: "development"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: order-db-url
+          # Init container or command to run migrations?
+          # The app seems to run migrations on start in docker-compose:
+          # command: sh -c "npm install && npx prisma generate && npx prisma db push --accept-data-loss && npm run dev"
+          # For K8s, we should probably do this in an init container or entrypoint.
+          # Since existing Dockerfile might not have this, we override args.
+          command: ["/bin/sh", "-c"]
+          args:
+            - npx prisma generate && npx prisma db push --accept-data-loss && npm start
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fast-food-order
+spec:
+  type: NodePort
+  ports:
+    - port: 3002
+      targetPort: 3002
+      nodePort: 30002
+  selector:
+    app: fast-food-order
