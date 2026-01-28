@@ -26,7 +26,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   linux_profile {
     admin_username = "azureuser"
     ssh_key {
-      key_data = file("/Users/rica000/.ssh/fastfood_aks.pub")
+      key_data = var.ssh_public_key
     }
   }
 
