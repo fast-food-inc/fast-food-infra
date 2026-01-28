@@ -35,7 +35,7 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   resource_group_name    = azurerm_resource_group.rg.name
   location               = azurerm_resource_group.rg.location
   version                = "13"
-  administrator_login    = var.postgres_admin_user
+  administrator_login    = var.postgres_admin_login
   administrator_password = var.postgres_admin_password
   storage_mb             = 32768
   sku_name               = "B_Standard_B1ms" # Cost effective

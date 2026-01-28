@@ -23,6 +23,10 @@ variable "postgres_admin_password" {
   sensitive   = true
 }
 
+variable "mongo_db_name" {
+  default = "fast-food-catalog-db"
+}
+
 variable "node_count" {
   default = 1
 }
