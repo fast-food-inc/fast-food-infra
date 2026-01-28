@@ -2,9 +2,9 @@
 set -e
 
 echo "🚀 Getting Terraform Outputs..."
-cd ../azure
-# Ensure we have the outputs
-terraform refresh > /dev/null
+cd azure
+# Skipping refresh to avoid lock issues
+# terraform refresh > /dev/null
 
 RG_NAME=$(terraform output -raw resource_group_name 2>/dev/null || echo "fast-food-rg")
 AKS_NAME=$(terraform output -raw aks_cluster_name 2>/dev/null || echo "fast-food-aks")
