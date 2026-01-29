@@ -5,6 +5,7 @@ resource "azurerm_cosmosdb_account" "mongo" {
   resource_group_name = azurerm_resource_group.rg.name
   offer_type          = "Standard"
   kind                = "MongoDB"
+  mongo_server_version = "4.2"
 
   capabilities {
     name = "EnableMongo"
@@ -34,6 +35,7 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   name                   = "fast-food-postgres-server"
   resource_group_name    = azurerm_resource_group.rg.name
   location               = azurerm_resource_group.rg.location
+  zone                   = "1"
   version                = "13"
   administrator_login    = var.postgres_admin_login
   administrator_password = var.postgres_admin_password
