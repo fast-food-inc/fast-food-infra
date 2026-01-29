@@ -3,7 +3,7 @@ variable "resource_group_name" {
 }
 
 variable "location" {
-  default = "East US 2"
+  default = "centralus"
 }
 
 variable "aks_cluster_name" {

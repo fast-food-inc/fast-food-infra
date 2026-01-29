@@ -10,7 +10,7 @@ resource "azurerm_cosmosdb_account" "mongo" {
     name = "EnableMongo"
   }
 
-  count = 1 
+  count = 1
 
   consistency_policy {
     consistency_level = "Session"

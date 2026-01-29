@@ -13,9 +13,9 @@ resource "azurerm_kubernetes_cluster" "aks" {
   dns_prefix          = "fastfoodaks"
 
   default_node_pool {
-    name       = "default"
-    node_count = var.node_count
-    vm_size    = "Standard_B2s" # Cost effective for testing
+    name           = "default"
+    node_count     = var.node_count
+    vm_size        = "Standard_B2s" # Cost effective for testing
     vnet_subnet_id = azurerm_subnet.aks_subnet.id
   }
 
